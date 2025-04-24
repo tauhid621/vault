@@ -112,6 +112,22 @@ LANGUAGE plpgsql;
   for storing high availability information. This table must already exist (Vault
   will not attempt to create it).
 
+- `use_aws_iam` `(string: "true|false")` - Default not enabled. If enabled, AWS IAM 
+  authentication is used for connecting with the database.
+
+- `aws_db_region` `(string: "")` –  Specifies the AWS region where DB is situated.
+  Required when `use_aws_iam` is set to  `true`
+
+- `use_azure_msi` `(string: "true|false")` - Default not enabled. If enabled, Azure MSI 
+  authentication is used for connecting with the database.
+
+- `azure_client_id` `(string: "")` – Client ID of a user-assigned Managed Service Identity.
+  System-assigned Managed Service Identity is used if `azure_client_id` is not provided and
+  `use_azure_msi` is enabled.
+
+- `use_gcp_default_credentials` `(string: "")` – Default not enabled. If enabled, GCP default
+  credentials are used to authenticate to the PostgreSQL server via GCP IAM.
+
 ## `postgresql` examples
 
 ### Custom SSL verification

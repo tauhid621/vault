@@ -15,6 +15,7 @@ import (
 
 	"github.com/armon/go-metrics"
 	log "github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-pgmultiauth"
 	"github.com/hashicorp/go-secure-stdlib/permitpool"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/vault/sdk/database/helper/dbutil"
@@ -129,8 +130,22 @@ func NewPostgreSQLBackend(conf map[string]string, logger log.Logger) (physical.B
 		}
 	}
 
+	ctx := context.Background()
+	config, err := pgmultiauth.DefaultConfig(ctx, connURL, logger, pgmultiauth.DefaultAuthConfigOptions{
+		UseAWSIAM:   conf["use_aws_iam"] == "true",
+		AWSDBRegion: conf["aws_db_region"],
+
+		UseAzureMSI:   conf["use_azure_msi"] == "true",
+		AzureClientID: conf["azure_client_id"],
+
+		UseGCPDefaultCredentials: conf["use_gcp_default_credentials"] == "true",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating auth config: %w", err)
+	}
+
 	// Create PostgreSQL handle for the database.
-	db, err := sql.Open("pgx", connURL)
+	db, err := pgmultiauth.Open(ctx, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to postgres: %w", err)
 	}
